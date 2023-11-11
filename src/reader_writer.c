@@ -1,4 +1,4 @@
-#include "../header/reader.h"
+#include "../headers/reader_writer.h"
 
 void reader(void)
 {
@@ -22,5 +22,17 @@ void reader(void)
         }
         pthread_mutex_unlock(&mutex);
         process_data();
+    }
+}
+
+void writer(void)
+{
+    while (true)
+    {
+        prepare_data();
+        sem_wait(&db);
+        // section critique, un seul writer à la fois
+        write_database();
+        sem_post(&db);
     }
 }
