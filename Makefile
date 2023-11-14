@@ -1,13 +1,17 @@
 CC = gcc
-FILES = writer-reader
+FILES = src
 
-main :
-	$(CC) -o main $(FILES)/reader.c $(FILES)/writer.c main.c
+philo :
+	$(CC) -o philo $(FILES)/philosophes.c main.c
+
+reader_writer :
+	$(CC) -o reader_writer $(FILES)/reader_writer.c main.c
 
 run :
-	make -s main
-	./main
+	make -s $(1)
+	./$(1)
 
 clean :
-	rm -f main
+	rm -f philo
+	rm -f reader_writer
 	clear
