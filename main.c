@@ -1,4 +1,5 @@
 #include "headers/includes.h"
+#include "headers/philosophes.h"
 
 // Pas pour tout de suite
 /*
@@ -50,3 +51,17 @@ int main(int argc, char const **argv)
     return 0;
 }
 */
+
+int main(int argc, char const *argv[])
+{
+    if (argc >= 2)
+    {
+        int nbr_philosophes = atoi(argv[1]);
+        run_philosophes(nbr_philosophes);
+    } else
+    {
+        printf("No argument\n");
+    }
+
+    return 0;
+}
