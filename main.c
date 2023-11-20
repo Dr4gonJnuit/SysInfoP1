@@ -16,6 +16,16 @@ int parse_args(args_p *args, int argc, char *argv[])
 {
     memset(args, 0, sizeof(args_p));
 
+    args->name = strrchr(argv[0], '/');
+    if (args->name)
+    {
+        args->name++;
+    }
+    else
+    {
+        args->name = argv[0];
+    }
+
     int opt;
     while ((opt = getopt(argc, argv, "hn:f:")) != -1)
     {
