@@ -54,8 +54,13 @@ void *philosophe(void *arg)
 
 void run_philosophes(int nbr_philosophe)
 {
+    int err; ///< Variable used to verify the eventual error.
     pthread_t phil[nbr_philosophe];
     chopsticks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * nbr_philosophe);
+    if (chopsticks == NULL)
+    {
+        error(0, "malloc(chopsticks)");
+    }
 
     struct args_philosophes args_philosophes[nbr_philosophe];
 
@@ -68,21 +73,38 @@ void run_philosophes(int nbr_philosophe)
 
     for (i = 0; i < nbr_philosophe; i++)
     {
-        pthread_mutex_init(&chopsticks[i], NULL);
+        err = pthread_mutex_init(&chopsticks[i], NULL);
+        if (err != 0)
+        {
+            error(err, "Mutex(es) Initialisation (pthread_mutex_init())");
+        }
+        
     }
 
     for (i = 0; i < nbr_philosophe; i++)
     {
-        pthread_create(&phil[i], NULL, philosophe, (void *)&(args_philosophes[i]));
+        err = pthread_create(&phil[i], NULL, philosophe, (void *)&(args_philosophes[i]));
+        if (err != 0)
+        {
+            error(err, "Thread(s) Creation (pthread_create())");
+        }
     }
 
     for (i = 0; i < nbr_philosophe; i++)
     {
-        pthread_join(phil[i], NULL);
+        err = pthread_join(phil[i], NULL);
+        if (err != 0)
+        {
+            error(err, "Thread(s) Join (pthread_join())");
+        }
     }
 
     for (i = 0; i < nbr_philosophe; i++)
     {
-        pthread_mutex_destroy(&chopsticks[i]);
+        err = pthread_mutex_destroy(&chopsticks[i]);
+        if (err != 0)
+        {
+            error(err, "Mutex(es) Destruction (pthread_mutex_destroy())");
+        }
     }
 }
