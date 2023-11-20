@@ -9,8 +9,12 @@ philo : main.c src/philosophes.c #src/includes.c
 run_philo : philo # Ensure that philo exist. Otherwise, launch make philo.
 	./philo $(filter-out $@,$(MAKECMDGOALS))
 
+run : main.c src/philosophes.c src/includes.c
+	$(CC) $(HEADER_DIRECTORY) $(FLAGS) -o main $^ $(LIBS)
+
 clean :
 	rm -f philo
+	rm -f main
 	rm -f todel
 	rm -f todel.*
 
