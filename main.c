@@ -1,33 +1,37 @@
 #include "headers/includes.h"
 #include "headers/philosophes.h"
 
-// Pas pour tout de suite
-/*
-typedef struct
+typedef struct args_p
 {
-    FILE *input_file;
-    FILE *output_stream;
-} args_t;
-
+    char *name;
+    int n;
+} args_p;
 
 void usage(char *prog_name)
 {
-    return;
+    printf("Usage: %s -n <nbr_philosophes>\n", prog_name);
 }
 
-int parse_args(args_t *args, int argc, char const **argv)
+int parse_args(args_p *args, int argc, char *argv[])
 {
-    memset(args, 0, sizeof(args_t));
+    memset(args, 0, sizeof(args_p));
 
-    args->output_stream = stdout;
-    args->input_file = NULL;
     int opt;
-    while ((opt = getopt(argc, argv, "hn:vf:")) != -1)
+    while ((opt = getopt(argc, argv, "hn:f:")) != -1)
     {
         switch (opt)
         {
+        case 'n':
+            args->n = atoi(optarg);
+            break;
+        case 'f':
+            args->name = optarg;
+            break;
         case '?':
         case 'h':
+            usage(argv[0]);
+            return 1;
+        default:
             usage(argv[0]);
             return 1;
         }
@@ -36,29 +40,31 @@ int parse_args(args_t *args, int argc, char const **argv)
     return 0;
 }
 
-int main(int argc, char const **argv)
-{
-    args_t args;
-    int err = parse_args(&args, argc, argv);
-    if (err == -1)
-    {
-        exit(EXIT_FAILURE);
-    }
-    else if (err == 1)
-    {
-        exit(EXIT_SUCCESS);
-    }
-    return 0;
-}
-*/
-
-int main(int argc, char const *argv[])
+int main(int argc, char *argv[])
 {
     if (argc >= 2)
     {
-        int nbr_philosophes = atoi(argv[1]);
-        run_philosophes(nbr_philosophes);
-    } else
+        args_p args;
+        int err = parse_args(&args, argc, argv);
+        if (err == -1)
+        {
+            exit(EXIT_FAILURE);
+        }
+        else if (err == 1)
+        {
+            exit(EXIT_SUCCESS);
+        }
+
+        if (strcmp(args.name, "philo") == 0)
+        {
+            run_philosophes(args.n);
+        }
+        else
+        {
+            printf("Invalid argument\n");
+        }
+    }
+    else
     {
         printf("No argument\n");
     }
