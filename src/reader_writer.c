@@ -1,7 +1,9 @@
 #include "../headers/reader_writer.h"
 
-#define READER_CYCLE 2560
-#define WRITER_CYCLE 640
+// #define READER_CYCLE 2560
+// #define WRITER_CYCLE 640
+#define READER_CYCLE 25
+#define WRITER_CYCLE 6
 
 pthread_mutex_t mutex;
 pthread_mutex_t mutex_readcount;
@@ -123,6 +125,18 @@ void run_reader_writer(int readers, int writers)
 		error(err, "Mutex Write Initialization (pthread_mutex_init())");
 	}
 
+	// Initialize the semaphore
+	if (sem_init(&reader_sem, 0, 1) == -1)
+	{
+		perror("Semaphore Initialization (sem_init())");
+		exit(EXIT_FAILURE);
+	}
+	if (sem_init(&writer_sem, 0, 1) == -1)
+	{
+		perror("Semaphore Initialization (sem_init())");
+		exit(EXIT_FAILURE);
+	}
+	
 	int i, j;
 	for (i = 0; i < readers; i++)
 	{
