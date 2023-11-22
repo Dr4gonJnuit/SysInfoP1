@@ -54,7 +54,7 @@ void *philosophe(void *arg)
 
 void run_philosophes(int nbr_philosophe)
 {
-    int err; ///< Variable used to verify the eventual error.
+    int err; //< Variable used to verify the eventual error.
     pthread_t phil[nbr_philosophe];
     chopsticks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * nbr_philosophe);
     if (chopsticks == NULL)
@@ -107,4 +107,6 @@ void run_philosophes(int nbr_philosophe)
             error(err, "Mutex(es) Destruction (pthread_mutex_destroy())");
         }
     }
+
+    free(chopsticks);
 }
