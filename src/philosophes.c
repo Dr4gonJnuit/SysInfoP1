@@ -5,8 +5,7 @@
 
 #include "../headers/philosophes.h"
 
-#define CYCLES 10 // 10000000 = 10 000 000
-#define CYCLES_GOOD 10000000
+#define CYCLES 10000000 // 10000000 = 10 000 000
 
 pthread_mutex_t *chopsticks; ///< Array of mutexes representing the chopsticks.
 
@@ -42,7 +41,7 @@ void *philosophe(void *arg)
             pthread_mutex_lock(&chopsticks[left]);
         }
 
-        eat(id);
+        // eat(id);
         
         pthread_mutex_unlock(&chopsticks[left]);
         pthread_mutex_unlock(&chopsticks[right]);

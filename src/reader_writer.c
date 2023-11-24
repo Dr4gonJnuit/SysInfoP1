@@ -1,9 +1,7 @@
 #include "../headers/reader_writer.h"
 
-// #define READER_CYCLE 2560
-// #define WRITER_CYCLE 640
-#define READER_CYCLE 25
-#define WRITER_CYCLE 6
+#define READER_CYCLE 2500
+#define WRITER_CYCLE 640
 
 pthread_mutex_t mutex;
 pthread_mutex_t mutex_readcount;
@@ -46,7 +44,7 @@ void *reader()
 		sem_post(&reader_sem);
 		pthread_mutex_unlock(&mutex);
 
-		read_data(); //< Reading database
+		// read_data(); //< Reading database
 
 		pthread_mutex_lock(&mutex_readcount);
 		readcount--;
@@ -84,7 +82,7 @@ void *writer()
 
 		sem_wait(&writer_sem);
 
-		write_data(); //< Write on the database
+		// write_data(); //< Write on the database
 
 		sem_post(&writer_sem);
 
