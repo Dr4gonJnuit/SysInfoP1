@@ -12,7 +12,51 @@ typedef struct args_p
 
 void usage(char *prog_name)
 {
-    printf("Usage: %s -n <nbr_philosophes>\n", prog_name);
+    if (strcmp(prog_name, "main") == 0)
+    {
+        printf("Usage: ./%s [OPTION]...\n", prog_name);
+        printf("Options:\n");
+        printf("  -f <name>      name of the program to run\n");
+        printf("  -h             display this help and exit\n");
+        printf("\n");
+        printf("Examples:\n");
+        printf("./main -f philo -h\n");
+        printf("./main -f reader_writer -h\n");
+        printf("\n");
+        return;
+    }
+
+    printf("Usage: ./main -f %s [OPTION]...\n", prog_name);
+    printf("Run the program with the specified option\n");
+    printf("\n");
+    if (strcmp(prog_name, "philo") == 0)
+    {
+        printf("Options:\n");
+        printf("  -n <number>    number of philosophers\n");
+        printf("  -h             display this help and exit\n");
+        printf("\n");
+        printf("Examples:\n");
+        printf("./main -f philo -n 5\n");
+        printf("\n");
+        return;
+    }
+    else if (strcmp(prog_name, "reader_writer") == 0)
+    {
+        printf("Options:\n");
+        printf("  -i <number>    number of readers\n");
+        printf("  -j <number>    number of writers\n");
+        printf("  -h             display this help and exit\n");
+        printf("\n");
+        printf("Examples:\n");
+        printf("./main -f reader_writer -i 5 -j 5\n");
+        printf("\n");
+        return;
+    }
+    else
+    {
+        printf("Error in showing help\n");
+        return;
+    }
 }
 
 int parse_args(args_p *args, int argc, char *argv[])
@@ -66,7 +110,7 @@ int parse_args(args_p *args, int argc, char *argv[])
             break;
         case '?':
         case 'h':
-            usage(argv[0]);
+            usage(args->name);
             return 1;
         default:
             usage(argv[0]);
