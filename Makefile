@@ -8,10 +8,11 @@ ALL=0
 run : main.c src/philosophes.c src/reader_writer.c src/produc_conso.c src/includes.c
 	$(CC) $(HEADER_DIRECTORY) $(FLAGS) -o main $^ $(LIBS)
 
-times : performance/temps_philo.sh performance/temps_rw.sh
+times : performance/temps_philo.sh performance/temps_rw.sh performance/temps_pc.sh
 	@if [ "$(LAUNCH)" = NULL ]; then\
 		./performance/temps_philo.sh;\
 		./performance/temps_rw.sh;\
+		./performance/temps_pc.sh;\
 	elif [ "$(LAUNCH)" = "philo" ]; then\
 		./performance/temps_philo.sh;\
 	elif [ "$(LAUNCH)" = "rw" ]; then\
