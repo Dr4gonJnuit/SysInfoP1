@@ -1,5 +1,5 @@
-#ifndef PHILOSOPHES
-#define PHILOSOPHES
+#ifndef PHILOSOPHES_H
+#define PHILOSOPHES_H
 
 #include "includes.h"
 
@@ -17,4 +17,4 @@ typedef struct args_philosophes
  */
 void run_philosophes(int nbr_philosophe);
 
-#endif // PHILOSOPHES
+#endif // PHILOSOPHES_H

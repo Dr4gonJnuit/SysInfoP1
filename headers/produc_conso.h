@@ -1,5 +1,5 @@
-#ifndef READER_WRITER_H
-#define READER_WRITER_H
+#ifndef PRODUC_CONSO_H
+#define PRODUC_CONSO_H
 
 #include "includes.h"
 
@@ -9,6 +9,6 @@
  *
  * @param nbr_philosophe Number of philosophers.
  */
-void run_reader_writer(int nbr_reader, int nbr_writer);
+void run_produc_conso(int nbr_produc, int nbr_conso);
 
-#endif // READER_WRITER_H
+#endif // PRODUC_CONSO_H

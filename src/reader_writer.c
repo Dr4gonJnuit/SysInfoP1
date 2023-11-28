@@ -3,7 +3,7 @@
 #define READER_CYCLE 2500
 #define WRITER_CYCLE 640
 
-pthread_mutex_t mutex;
+pthread_mutex_t mutex_rw;
 pthread_mutex_t mutex_readcount;
 pthread_mutex_t mutex_writecount;
 
@@ -30,7 +30,7 @@ void *reader()
 	int i = 0;
 	while (i < READER_CYCLE)
 	{
-		pthread_mutex_lock(&mutex);
+		pthread_mutex_lock(&mutex_rw);
 		sem_wait(&reader_sem);
 
 		pthread_mutex_lock(&mutex_readcount);
@@ -42,7 +42,7 @@ void *reader()
 
 		pthread_mutex_unlock(&mutex_readcount);
 		sem_post(&reader_sem);
-		pthread_mutex_unlock(&mutex);
+		pthread_mutex_unlock(&mutex_rw);
 
 		// read_data(); //< Reading database
 
@@ -101,13 +101,13 @@ void *writer()
 	return (NULL);
 }
 
-void run_reader_writer(int readers, int writers)
+void run_reader_writer(int nbr_readers, int nbr_writers)
 {
 	int err; //< Variable used to verify the eventual error.
-	pthread_t *threads = malloc(sizeof(pthread_t) * (readers + writers));
+	pthread_t *threads = malloc(sizeof(pthread_t) * (nbr_readers + nbr_writers));
 
-	// Initialize the mutex
-	err = pthread_mutex_init(&mutex, NULL);
+	// Initialize the mutex_rw
+	err = pthread_mutex_init(&mutex_rw, NULL);
 	if (err != 0)
 	{
 		error(err, "Mutex Initialization (pthread_mutex_init())");
@@ -136,7 +136,7 @@ void run_reader_writer(int readers, int writers)
 	}
 	
 	int i, j;
-	for (i = 0; i < readers; i++)
+	for (i = 0; i < nbr_readers; i++)
 	{
 		err = pthread_create(&threads[i], NULL, reader, NULL);
 		if (err != 0)
@@ -145,7 +145,7 @@ void run_reader_writer(int readers, int writers)
         }
 	}
 
-	for (j = 0; j < writers; j++)
+	for (j = 0; j < nbr_writers; j++)
 	{
 		err = pthread_create(&threads[i + j], NULL, writer, NULL);
 		if (err != 0)
@@ -154,7 +154,7 @@ void run_reader_writer(int readers, int writers)
         }
 	}
 
-	for (i = 0; i < readers + writers; i++)
+	for (i = 0; i < nbr_readers + nbr_writers; i++)
 	{
 		err = pthread_join(threads[i], NULL);
 		if (err != 0)
@@ -163,8 +163,8 @@ void run_reader_writer(int readers, int writers)
         }
 	}
 	
-	// Destroy the mutex
-	err = pthread_mutex_destroy(&mutex);
+	// Destroy the mutex_rw
+	err = pthread_mutex_destroy(&mutex_rw);
 	if (err != 0)
 	{
 		error(err, "Mutex Destruction (pthread_mutex_destroy())");

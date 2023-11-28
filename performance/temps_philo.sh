@@ -1,10 +1,10 @@
 #!/bin/bash
 
 if [ -z "$(find "performance")" ]; then # if we are already in the performance folder
-    echo "n,m_p1,m_p2,m_p3,m_p4,m_p5," > "csv/temps_philo.csv"
+    echo "n,m_p1,m_p2,m_p3,m_p4,m_p5" > "csv/temps_philo.csv"
     cd ..
 else # if we call the script with make times
-    echo "n,m_p1,m_p2,m_p3,m_p4,m_p5," > "performance/csv/temps_philo.csv"
+    echo "n,m_p1,m_p2,m_p3,m_p4,m_p5" > "performance/csv/temps_philo.csv"
 fi
 
 make -s

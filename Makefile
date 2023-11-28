@@ -5,7 +5,7 @@ LIBS = -lpthread
 LAUNCH=NULL
 ALL=0
 
-run : main.c src/philosophes.c src/reader_writer.c src/includes.c
+run : main.c src/philosophes.c src/reader_writer.c src/produc_conso.c src/includes.c
 	$(CC) $(HEADER_DIRECTORY) $(FLAGS) -o main $^ $(LIBS)
 
 times : performance/temps_philo.sh performance/temps_rw.sh
@@ -16,6 +16,10 @@ times : performance/temps_philo.sh performance/temps_rw.sh
 		./performance/temps_philo.sh;\
 	elif [ "$(LAUNCH)" = "rw" ]; then\
 		./performance/temps_rw.sh;\
+	elif [ "$(LAUNCH)" = "pc" ]; then\
+		./performance/temps_pc.sh;\
+	else\
+		echo "Error : wrong argument";\
 	fi
 
 %o : %.c

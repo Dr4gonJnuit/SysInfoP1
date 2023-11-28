@@ -1,5 +1,5 @@
-#ifndef INCLUDES
-#define INCLUDES
+#ifndef INCLUDES_H
+#define INCLUDES_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,4 +18,4 @@
  */
 void error(int err, char *msg);
 
-#endif // INCLUDES
+#endif // INCLUDES_H
