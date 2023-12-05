@@ -4,10 +4,16 @@
  */
 
 #include "../headers/philosophes.h"
+#include "../headers/my_mutex.h"
 
 #define CYCLES 10000000 // 10000000 = 10 000 000
+// #define CYCLES 10
 
+#ifdef MYMUTEX_H
+my_mutex *chopsticks; ///< Array of mutexes representing the chopsticks.
+#else
 pthread_mutex_t *chopsticks; ///< Array of mutexes representing the chopsticks.
+#endif
 
 void eat(int id)
 {
@@ -32,19 +38,34 @@ void *philosophe(void *arg)
     {
         if (left < right) // Verifie if he can take a chopsticks.
         {
+            #ifdef MYMUTEX_H
+            test_and_set(&chopsticks[left]);
+            test_and_set(&chopsticks[right]);
+            #else
             pthread_mutex_lock(&chopsticks[left]);
             pthread_mutex_lock(&chopsticks[right]);
+            #endif
         }
         else
         {
+            #ifdef MYMUTEX_H
+            test_and_set(&chopsticks[right]);
+            test_and_set(&chopsticks[left]);
+            #else
             pthread_mutex_lock(&chopsticks[right]);
             pthread_mutex_lock(&chopsticks[left]);
+            #endif
         }
 
         // eat(id);
         
+        #ifdef MYMUTEX_H
+        unlock(&chopsticks[left]);
+        unlock(&chopsticks[right]);
+        #else
         pthread_mutex_unlock(&chopsticks[left]);
         pthread_mutex_unlock(&chopsticks[right]);
+        #endif
         i++;
     }
 
@@ -55,11 +76,20 @@ void run_philosophes(int nbr_philosophe)
 {
     int err; //< Variable used to verify the eventual error.
     pthread_t phil[nbr_philosophe];
+
+    #ifdef MYMUTEX_H
+    chopsticks = (my_mutex *)malloc(sizeof(my_mutex) * nbr_philosophe);
+    if (chopsticks == NULL)
+    {
+        error(0, "malloc(chopsticks)");
+    }
+    #else
     chopsticks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * nbr_philosophe);
     if (chopsticks == NULL)
     {
         error(0, "malloc(chopsticks)");
     }
+    #endif
 
     struct args_philosophes args_philosophes[nbr_philosophe];
 
@@ -72,11 +102,15 @@ void run_philosophes(int nbr_philosophe)
 
     for (i = 0; i < nbr_philosophe; i++)
     {
+        #ifdef MYMUTEX_H
+        my_mutex_init(&chopsticks[i]);
+        #else
         err = pthread_mutex_init(&chopsticks[i], NULL);
         if (err != 0)
         {
             error(err, "Mutex(es) Initialisation (pthread_mutex_init())");
         }
+        #endif
         
     }
 
@@ -98,6 +132,8 @@ void run_philosophes(int nbr_philosophe)
         }
     }
 
+    #ifdef MYMUTEX_H
+    #else
     for (i = 0; i < nbr_philosophe; i++)
     {
         err = pthread_mutex_destroy(&chopsticks[i]);
@@ -106,6 +142,7 @@ void run_philosophes(int nbr_philosophe)
             error(err, "Mutex(es) Destruction (pthread_mutex_destroy())");
         }
     }
+    #endif
 
     free(chopsticks);
 }

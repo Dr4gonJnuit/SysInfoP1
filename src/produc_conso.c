@@ -1,4 +1,5 @@
 #include "../headers/produc_conso.h"
+#include "../headers/my_mutex.h"
 
 #define TAILLE_BUFFER 8
 #define PRODUITS 8192
@@ -8,7 +9,11 @@
 int buffer[TAILLE_BUFFER];
 int debut = 0, fin = 0;
 
+#ifdef MYMUTEX_H
+my_mutex mutex;
+#else
 pthread_mutex_t mutex;
+#endif
 sem_t plein, vide;
 
 void conso(int element)
@@ -26,7 +31,11 @@ void *producteur(void *arg)
 		element = rand() % (MAX_INT - MIN_INT + 1) + MIN_INT;
 
 		sem_wait(&vide);
+		#ifdef MYMUTEX_H
+		test_and_set(&mutex);
+		#else
 		pthread_mutex_lock(&mutex);
+		#endif
 
 		// mettre elem dans buffer
 		buffer[fin] = element;
@@ -34,7 +43,11 @@ void *producteur(void *arg)
 		// on met a jour
 		fin = (fin + 1) % TAILLE_BUFFER;
 
+		#ifdef MYMUTEX_H
+		unlock(&mutex);
+		#else
 		pthread_mutex_unlock(&mutex);
+		#endif
 		sem_post(&plein);
 
 		// simule temps de traitement
@@ -56,7 +69,11 @@ void *consommateur(void *arg)
 	{
 
 		sem_wait(&plein);
+		#ifdef MYMUTEX_H
+		test_and_set(&mutex);
+		#else
 		pthread_mutex_lock(&mutex);
+		#endif
 
 		// Retirer un elem du buffer
 		element = buffer[debut];
@@ -67,7 +84,11 @@ void *consommateur(void *arg)
 		// on met a jour
 		debut = (debut + 1) % TAILLE_BUFFER;
 
+		#ifdef MYMUTEX_H
+		unlock(&mutex);
+		#else
 		pthread_mutex_unlock(&mutex);
+		#endif
 		sem_post(&vide);
 
 		// simule temps de traintement
@@ -86,7 +107,11 @@ void run_produc_conso(int nb_producteurs, int nb_consommateurs)
 	pthread_t threads_prod[nb_producteurs], threads_cons[nb_consommateurs];
 
 	// inti semaphores
+	#ifdef MYMUTEX_H
+	my_mutex_init(&mutex);
+	#else
 	pthread_mutex_init(&mutex, NULL);
+	#endif
 	sem_init(&plein, 0, 0);
 	sem_init(&vide, 0, TAILLE_BUFFER);
 
@@ -115,7 +140,10 @@ void run_produc_conso(int nb_producteurs, int nb_consommateurs)
 	}
 
 	// DESTROY SEMAPHORES
+	#ifdef MYMUTEX_H
+	#else
 	pthread_mutex_destroy(&mutex);
+	#endif
 	sem_destroy(&plein);
 	sem_destroy(&vide);
 }

@@ -23,6 +23,8 @@ def graph_plot(name, subplot_position=111, title='', show=False):
         plt.show()
 
 if __name__ == '__main__':
-    file_to_graph = ['csv/ingi_temps_philo.csv', 'csv/ingi_temps_pc.csv','csv/ingi_temps_rw.csv']
-    title_names = ['Temps d\'exécution du problème des philosophes', 'Temps d\'exécution du problème des producteurs-consomateurs','Temps d\'exécution du problème des lecteurs-écrivains']
-    graph_window((90, 40), file_to_graph, title_names)
+    # file_to_graph = ['csv/ingi_temps_philo.csv', 'csv/ingi_temps_pc.csv','csv/ingi_temps_rw.csv']
+    # title_names = ['Temps d\'exécution du problème des philosophes', 'Temps d\'exécution du problème des producteurs-consomateurs','Temps d\'exécution du problème des lecteurs-écrivains']
+    tas = ['csv/temps_TAS.csv']
+    tas_title = ['Temps d\'exécution du TAS simple']
+    graph_window((90, 40), tas, tas_title)
