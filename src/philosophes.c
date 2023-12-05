@@ -60,8 +60,8 @@ void *philosophe(void *arg)
         // eat(id);
         
         #ifdef MYMUTEX_H
-        unlock(&chopsticks[left]);
-        unlock(&chopsticks[right]);
+        my_unlock(&chopsticks[left]);
+        my_unlock(&chopsticks[right]);
         #else
         pthread_mutex_unlock(&chopsticks[left]);
         pthread_mutex_unlock(&chopsticks[right]);

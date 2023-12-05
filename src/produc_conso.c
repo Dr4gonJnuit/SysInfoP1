@@ -44,7 +44,7 @@ void *producteur(void *arg)
 		fin = (fin + 1) % TAILLE_BUFFER;
 
 		#ifdef MYMUTEX_H
-		unlock(&mutex);
+		my_unlock(&mutex);
 		#else
 		pthread_mutex_unlock(&mutex);
 		#endif
@@ -85,7 +85,7 @@ void *consommateur(void *arg)
 		debut = (debut + 1) % TAILLE_BUFFER;
 
 		#ifdef MYMUTEX_H
-		unlock(&mutex);
+		my_unlock(&mutex);
 		#else
 		pthread_mutex_unlock(&mutex);
 		#endif

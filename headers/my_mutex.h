@@ -10,17 +10,18 @@ typedef struct my_mutex
 
 void my_mutex_init(struct my_mutex *mutex);
 
-static inline bool my_lock(struct my_mutex *mutex)
+static inline long my_lock(struct my_mutex *mutex)
 {
+    long result;
     asm volatile(
         "movl $1, %%eax\n"
         "xchgl %%eax, %0\n"
-        : "+m"(mutex->flag)
+        : "+m"(mutex->flag), "=a"(result)
         :
-        : "eax", "memory"
+        : "memory"
     );
 
-    return mutex->flag;
+    return result;
 }
 
 void test_and_set(struct my_mutex *mutex);
