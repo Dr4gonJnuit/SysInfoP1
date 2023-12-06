@@ -1,4 +1,6 @@
-NAME_FILE="performance/csv/temps_philo_TAS.csv"
+NAME_FILE="performance/csv/temps_philo_POSIX.csv"
+#NAME_FILE="performance/csv/temps_philo_TAS.csv"
+#NAME_FILE="performance/csv/temps_philo_TTAS.csv"
 
 echo "n,t_1,t_2,t_3,t_4,t_5" > $NAME_FILE
 

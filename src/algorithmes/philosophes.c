@@ -9,7 +9,7 @@
 #define CYCLES 10000000 // 10000000 = 10 000 000
 // #define CYCLES 1000000
 
-#ifdef MYMUTEX_H
+#ifndef MYMUTEX_H
 my_mutex_t *chopsticks; ///< Array of mutexes representing the chopsticks.
 #else
 pthread_mutex_t *chopsticks; ///< Array of mutexes representing the chopsticks.
@@ -38,7 +38,7 @@ void *philosophe(void *arg)
     {
         if (left < right) // Verifie if he can take a chopsticks.
         {
-            #ifdef MYMUTEX_H
+            #ifndef MYMUTEX_H
             TAS_lock(&chopsticks[left]);
             TAS_lock(&chopsticks[right]);
             #else
@@ -48,7 +48,7 @@ void *philosophe(void *arg)
         }
         else
         {
-            #ifdef MYMUTEX_H
+            #ifndef MYMUTEX_H
             TAS_lock(&chopsticks[right]);
             TAS_lock(&chopsticks[left]);
             #else
@@ -59,7 +59,7 @@ void *philosophe(void *arg)
 
         // eat(id);
         
-        #ifdef MYMUTEX_H
+        #ifndef MYMUTEX_H
         my_unlock(&chopsticks[left]);
         my_unlock(&chopsticks[right]);
         #else
@@ -77,7 +77,7 @@ void run_philosophes(int nbr_philosophe)
     int err; //< Variable used to verify the eventual error.
     pthread_t phil[nbr_philosophe];
 
-    #ifdef MYMUTEX_H
+    #ifndef MYMUTEX_H
     chopsticks = (my_mutex_t *)malloc(sizeof(my_mutex_t) * nbr_philosophe);
     if (chopsticks == NULL)
     {
@@ -102,7 +102,7 @@ void run_philosophes(int nbr_philosophe)
 
     for (i = 0; i < nbr_philosophe; i++)
     {
-        #ifdef MYMUTEX_H
+        #ifndef MYMUTEX_H
         my_mutex_init(&chopsticks[i]);
         #else
         err = pthread_mutex_init(&chopsticks[i], NULL);
@@ -132,7 +132,7 @@ void run_philosophes(int nbr_philosophe)
         }
     }
 
-    #ifdef MYMUTEX_H
+    #ifndef MYMUTEX_H
     #else
     for (i = 0; i < nbr_philosophe; i++)
     {
