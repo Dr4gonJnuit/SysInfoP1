@@ -1,7 +1,7 @@
 #ifndef READER_WRITER_H
 #define READER_WRITER_H
 
-#include "includes.h"
+#include "../includes.h"
 
 /**
  * @brief Function to execute the Dining Philosophers Problem by launching the differents threads and mutexes.

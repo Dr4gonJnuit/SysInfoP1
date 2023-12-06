@@ -1,5 +1,6 @@
-#include "../headers/produc_conso.h"
-#include "../headers/my_mutex.h"
+#include "../../headers/algorithmes/produc_conso.h"
+#include "../../headers/attente_active/my_mutex.h"
+#include "../../headers/attente_active/my_semaphore.h"
 
 #define TAILLE_BUFFER 8
 #define PRODUITS 8192
@@ -9,12 +10,19 @@
 int buffer[TAILLE_BUFFER];
 int debut = 0, fin = 0;
 
+// Choose between my_mutex and pthread_mutex
 #ifdef MYMUTEX_H
-my_mutex mutex;
+my_mutex_t mutex;
 #else
 pthread_mutex_t mutex;
 #endif
+
+// Choose between my_semaphore and pthread_semaphore
+#ifdef MYSEMAPHORE_H
+my_semaphore_t plein, vide;
+#else
 sem_t plein, vide;
+#endif
 
 void conso(int element)
 {
@@ -30,9 +38,14 @@ void *producteur(void *arg)
 		// random number
 		element = rand() % (MAX_INT - MIN_INT + 1) + MIN_INT;
 
+		#ifdef MYSEMAPHORE_H
+		my_semaphore_wait(&vide);
+		#else
 		sem_wait(&vide);
+		#endif
+		
 		#ifdef MYMUTEX_H
-		test_and_set(&mutex);
+		TAS_lock(&mutex);
 		#else
 		pthread_mutex_lock(&mutex);
 		#endif
@@ -48,7 +61,12 @@ void *producteur(void *arg)
 		#else
 		pthread_mutex_unlock(&mutex);
 		#endif
+
+		#ifdef MYSEMAPHORE_H
+		my_semaphore_post(&plein);
+		#else
 		sem_post(&plein);
+		#endif
 
 		// simule temps de traitement
 		for (int j = 0; j < 10000; j++)
@@ -67,10 +85,14 @@ void *consommateur(void *arg)
 
 	for (int i = 0; i < PRODUITS; i++)
 	{
-
+		#ifdef MYSEMAPHORE_H
+		my_semaphore_wait(&plein);
+		#else
 		sem_wait(&plein);
+		#endif
+
 		#ifdef MYMUTEX_H
-		test_and_set(&mutex);
+		TAS_lock(&mutex);
 		#else
 		pthread_mutex_lock(&mutex);
 		#endif
@@ -89,7 +111,12 @@ void *consommateur(void *arg)
 		#else
 		pthread_mutex_unlock(&mutex);
 		#endif
+
+		#ifdef MYSEMAPHORE_H
+		my_semaphore_post(&vide);
+		#else
 		sem_post(&vide);
+		#endif
 
 		// simule temps de traintement
 		for (int j = 0; j < 10000; j++)
@@ -112,8 +139,14 @@ void run_produc_conso(int nb_producteurs, int nb_consommateurs)
 	#else
 	pthread_mutex_init(&mutex, NULL);
 	#endif
+
+	#ifdef MYSEMAPHORE_H
+	my_semaphore_init(&plein, 0);
+	my_semaphore_init(&vide, TAILLE_BUFFER);
+	#else
 	sem_init(&plein, 0, 0);
 	sem_init(&vide, 0, TAILLE_BUFFER);
+	#endif
 
 	// crée le thread producer
 	for (int i = 0; i < nb_producteurs; i++)
@@ -144,6 +177,10 @@ void run_produc_conso(int nb_producteurs, int nb_consommateurs)
 	#else
 	pthread_mutex_destroy(&mutex);
 	#endif
+
+	#ifdef MYSEMAPHORE_H
+	#else
 	sem_destroy(&plein);
 	sem_destroy(&vide);
+	#endif
 }

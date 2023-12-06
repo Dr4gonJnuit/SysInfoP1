@@ -1,7 +1,7 @@
 #ifndef PRODUC_CONSO_H
 #define PRODUC_CONSO_H
 
-#include "includes.h"
+#include "../includes.h"
 
 /**
  * @brief Function to execute the Dining Philosophers Problem by launching the differents threads and mutexes.

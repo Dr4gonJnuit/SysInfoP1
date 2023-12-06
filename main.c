@@ -1,19 +1,16 @@
 #include "headers/includes.h"
-#include "headers/philosophes.h"
-#include "headers/reader_writer.h"
-#include "headers/produc_conso.h"
+#include "headers/algorithmes/philosophes.h"
+#include "headers/algorithmes/reader_writer.h"
+#include "headers/algorithmes/produc_conso.h"
 
 typedef struct args_p
 {
-    char *name;
-    int nbr_philosophes;
-    int nbr_reader;
-    int nbr_writer;
-    int nbr_produc;
-    int nbr_conso;
+    char *name;          // name of the program to run
+    int nbr_threads[2];  // number of threads to run
+    bool attente_active; // if true then use our personal mutexes and semaphores
 } args_p;
 
-void usage(char *prog_name)
+void usage(char *prog_name) // Need to be updated
 {
     if (strcmp(prog_name, "main") == 0)
     {
@@ -24,8 +21,8 @@ void usage(char *prog_name)
         printf("\n");
         printf("Examples:\n");
         printf("./main -f philo -h\n");
-        printf("./main -f reader_writer -h\n");
-        printf("./main -f produc_conso -h\n");
+        printf("./main -f read_write -h\n");
+        printf("./main -f prod_cons -h\n");
         printf("\n");
         return;
     }
@@ -41,30 +38,31 @@ void usage(char *prog_name)
         printf("\n");
         printf("Examples:\n");
         printf("./main -f philo -n 5\n");
+        printf("This will run the philosophe algorithm with 5 philosophers\n");
         printf("\n");
         return;
     }
-    else if (strcmp(prog_name, "reader_writer") == 0)
+    else if (strcmp(prog_name, "read_write") == 0)
     {
         printf("Options:\n");
-        printf("  -i <number>    number of readers\n");
-        printf("  -j <number>    number of writers\n");
+        printf("  -n <number>    number of readers and writers\n");
         printf("  -h             display this help and exit\n");
         printf("\n");
         printf("Examples:\n");
-        printf("./main -f reader_writer -i 5 -j 5\n");
+        printf("./main -f read_write -n 4\n");
+        printf("This will run the readers-writers algorithm with 4 readers and 4 writers\n");
         printf("\n");
         return;
     }
-    else if (strcmp(prog_name, "produc_conso") == 0)
+    else if (strcmp(prog_name, "prod_cons") == 0)
     {
         printf("Options:\n");
-        printf("  -i <number>    number of producers\n");
-        printf("  -j <number>    number of consumers\n");
+        printf("  -n <number>    number of producers and consumers\n");
         printf("  -h             display this help and exit\n");
         printf("\n");
         printf("Examples:\n");
-        printf("./main -f produc_conso -i 5 -j 5\n");
+        printf("./main -f prod_cons -n 8\n");
+        printf("This will run the producers-consumers algorithm with 8 producers and 8 consumers\n");
         printf("\n");
         return;
     }
@@ -79,54 +77,58 @@ int parse_args(args_p *args, int argc, char *argv[])
 {
     memset(args, 0, sizeof(args_p));
 
-    args->name = strrchr(argv[0], '/');
-    if (args->name)
-    {
-        args->name++;
-    }
-    else
-    {
-        args->name = argv[0];
-    }
-    args->nbr_philosophes = 0;
-    args->nbr_reader = 0;
-    args->nbr_writer = 0;
-    args->nbr_produc = 0;
-    args->nbr_conso = 0;
-    
+    args->name = "main";
+    args->nbr_threads[0] = 0;
+    args->nbr_threads[1] = 0;
+    args->attente_active = false;
+
     int opt;
-    while ((opt = getopt(argc, argv, ":n:i:j:f:h")) != -1)
+    while ((opt = getopt(argc, argv, ":f:a:n:h")) != -1)
     {
         switch (opt)
         {
-        case 'n':
-            args->nbr_philosophes = atoi(optarg);
-            if (args->nbr_philosophes <= 0)
-            {
-                printf("Invalid argument\n");
-                return -1;
-            }
-            break;
-        case 'i':
-            args->nbr_reader = atoi(optarg);
-            args->nbr_produc = args->nbr_reader;
-            if (args->nbr_reader <= 0)
-            {
-                printf("Invalid argument\n");
-                return -1;
-            }
-            break;
-        case 'j':         
-            args->nbr_writer = atoi(optarg);
-            args->nbr_conso = args->nbr_writer;
-            if (args->nbr_writer <= 0)
-            {
-                printf("Invalid argument\n");
-                return -1;
-            }
-            break;
         case 'f':
             args->name = optarg;
+            break;
+        case 'a':
+            args->attente_active = true;
+            break;
+        case 'n':
+            if (strcmp(args->name, "philo") == 0)
+            {
+                args->nbr_threads[0] = atoi(optarg);
+                if (args->nbr_threads[0] <= 0)
+                {
+                    printf("Invalid argument\n");
+                    return -1;
+                }
+            }
+            else if (strcmp(args->name, "prod_cons") == 0)
+            {
+                args->nbr_threads[0] = atoi(optarg);
+                args->nbr_threads[1] = atoi(optarg);
+                if (args->nbr_threads[0] <= 0 || args->nbr_threads[1] <= 0)
+                {
+                    printf("Invalid argument\n");
+                    return -1;
+                }
+            }
+
+            else if (strcmp(args->name, "read_write") == 0) // Can't chose the number of readers and writers -> need to be fixed
+            {
+                args->nbr_threads[0] = atoi(optarg);
+                args->nbr_threads[1] = atoi(optarg);
+                if (args->nbr_threads[0] <= 0 || args->nbr_threads[1] <= 0)
+                {
+                    printf("Invalid argument\n");
+                    return -1;
+                }
+            }
+            else
+            {
+                printf("Invalid name\n");
+                return -1;
+            }
             break;
         case '?':
         case 'h':
@@ -158,15 +160,15 @@ int main(int argc, char *argv[])
 
         if (strcmp(args.name, "philo") == 0)
         {
-            run_philosophes(args.nbr_philosophes);
+            run_philosophes(args.nbr_threads[0]);
         }
-        else if (strcmp(args.name, "reader_writer") == 0)
+        else if (strcmp(args.name, "read_write") == 0)
         {
-            run_reader_writer(args.nbr_reader, args.nbr_writer);
+            run_reader_writer(args.nbr_threads[1], args.nbr_threads[1]);
         }
-        else if (strcmp(args.name, "produc_conso") == 0)
+        else if (strcmp(args.name, "prod_cons") == 0)
         {
-            run_produc_conso(args.nbr_produc, args.nbr_conso);
+            run_produc_conso(args.nbr_threads[0], args.nbr_threads[1]);
         }
         else
         {
@@ -178,5 +180,5 @@ int main(int argc, char *argv[])
         printf("No argument\n");
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }

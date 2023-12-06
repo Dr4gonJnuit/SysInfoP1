@@ -3,14 +3,14 @@
  * @brief Dining Philosophers Problem implementation.
  */
 
-#include "../headers/philosophes.h"
-#include "../headers/my_mutex.h"
+#include "../../headers/algorithmes/philosophes.h"
+#include "../../headers/attente_active/my_mutex.h"
 
 #define CYCLES 10000000 // 10000000 = 10 000 000
-// #define CYCLES 10
+// #define CYCLES 1000000
 
 #ifdef MYMUTEX_H
-my_mutex *chopsticks; ///< Array of mutexes representing the chopsticks.
+my_mutex_t *chopsticks; ///< Array of mutexes representing the chopsticks.
 #else
 pthread_mutex_t *chopsticks; ///< Array of mutexes representing the chopsticks.
 #endif
@@ -39,8 +39,8 @@ void *philosophe(void *arg)
         if (left < right) // Verifie if he can take a chopsticks.
         {
             #ifdef MYMUTEX_H
-            test_and_set(&chopsticks[left]);
-            test_and_set(&chopsticks[right]);
+            TAS_lock(&chopsticks[left]);
+            TAS_lock(&chopsticks[right]);
             #else
             pthread_mutex_lock(&chopsticks[left]);
             pthread_mutex_lock(&chopsticks[right]);
@@ -49,8 +49,8 @@ void *philosophe(void *arg)
         else
         {
             #ifdef MYMUTEX_H
-            test_and_set(&chopsticks[right]);
-            test_and_set(&chopsticks[left]);
+            TAS_lock(&chopsticks[right]);
+            TAS_lock(&chopsticks[left]);
             #else
             pthread_mutex_lock(&chopsticks[right]);
             pthread_mutex_lock(&chopsticks[left]);
@@ -78,7 +78,7 @@ void run_philosophes(int nbr_philosophe)
     pthread_t phil[nbr_philosophe];
 
     #ifdef MYMUTEX_H
-    chopsticks = (my_mutex *)malloc(sizeof(my_mutex) * nbr_philosophe);
+    chopsticks = (my_mutex_t *)malloc(sizeof(my_mutex_t) * nbr_philosophe);
     if (chopsticks == NULL)
     {
         error(0, "malloc(chopsticks)");

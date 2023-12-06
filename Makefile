@@ -1,30 +1,42 @@
 CC = gcc
 FLAGS = -Wall -Werror
 HEADER_DIRECTORY = -Iheaders # Look in headers folder for the *.h /!\ it's normal if the name is connected to I, it's a convention /!\.
+ALGO_DIR = src/algorithmes
+MUT_DIR = src/attente_active
+SH_DIR = performance/bash
 LIBS = -lpthread
+
+#############################
+# Variables for the options #
+#############################
 LAUNCH=NULL
 ALL=0
 
-run : main.c src/philosophes.c src/reader_writer.c src/produc_conso.c src/my_mutex.c src/includes.c
+############
+# Commands #
+############
+run : main.c $(ALGO_DIR)/philosophes.c $(ALGO_DIR)/reader_writer.c $(ALGO_DIR)/produc_conso.c $(MUT_DIR)/my_semaphore.c $(MUT_DIR)/my_mutex.c src/includes.c
 	$(CC) $(HEADER_DIRECTORY) $(FLAGS) -o main $^ $(LIBS)
 
-times : performance/temps_philo.sh performance/temps_rw.sh performance/temps_pc.sh
+TAS : performance/perf_TAS.c $(MUT_DIR)/my_mutex.c src/includes.c
+	$(CC) $(HEADER_DIRECTORY) $(FLAGS) -o perf_TAS $^ $(LIBS)
+
+times : $(SH_DIR)/temps_philo.sh $(SH_DIR)/temps_rw.sh $(SH_DIR)/temps_pc.sh $(SH_DIR)/temps_TAS.sh
 	@if [ "$(LAUNCH)" = NULL ]; then\
-		./performance/temps_philo.sh;\
-		./performance/temps_rw.sh;\
-		./performance/temps_pc.sh;\
+		./$(SH_DIR)/temps_philo.sh;\
+		./$(SH_DIR)/temps_rw.sh;\
+		./$(SH_DIR)/temps_pc.sh;\
 	elif [ "$(LAUNCH)" = "philo" ]; then\
-		./performance/temps_philo.sh;\
+		./$(SH_DIR)/temps_philo.sh;\
 	elif [ "$(LAUNCH)" = "rw" ]; then\
-		./performance/temps_rw.sh;\
+		./$(SH_DIR)/temps_rw.sh;\
 	elif [ "$(LAUNCH)" = "pc" ]; then\
-		./performance/temps_pc.sh;\
+		./$(SH_DIR)/temps_pc.sh;\
+	elif [ "$(LAUNCH)" = "tas" ]; then\
+		./$(SH_DIR)/temps_TAS.sh;\
 	else\
 		echo "Error : wrong argument";\
 	fi
-
-TAS : performance/perf_TAS.c src/my_mutex.c src/includes.c
-	$(CC) $(HEADER_DIRECTORY) $(FLAGS) -o perf_TAS $^ $(LIBS)
 
 %o : %.c
 	$(CC) $(HEADER_DIRECTORY) $(FLAGS) -c $< -o $@

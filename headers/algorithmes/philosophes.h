@@ -1,7 +1,7 @@
 #ifndef PHILOSOPHES_H
 #define PHILOSOPHES_H
 
-#include "includes.h"
+#include "../includes.h"
 
 typedef struct args_philosophes
 {

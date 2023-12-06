@@ -1,5 +1,5 @@
 #include "../headers/includes.h"
-#include "../headers/my_mutex.h"
+#include "../headers/attente_active/my_mutex.h"
 
 #define CYCLES 6400
 
@@ -13,7 +13,7 @@ void *TAS_test(void *arg)
     int i = 0;
     while (i < CYCLES / nbr_threads)
     {
-        test_and_set(spin);
+        TATAS_lock(spin);
 
         // critical section
         test++;
