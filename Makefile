@@ -26,7 +26,7 @@ TAS : performance/perf_TAS.c $(MUT_DIR)/my_mutex.c src/includes.c
 #run : performance/perf_TAS.c $(MUT_DIR)/my_mutex.c src/includes.c
 #	$(CC) $(HEADER_DIRECTORY) $(FLAGS) -o perf_TAS $^ $(LIBS)
 
-times : $(SH_DIR)/temps_philo.sh $(SH_DIR)/temps_rw.sh $(SH_DIR)/temps_pc.sh $(SH_DIR)/temps_TAS.sh
+tests : $(SH_DIR)/temps_philo.sh $(SH_DIR)/temps_rw.sh $(SH_DIR)/temps_pc.sh $(SH_DIR)/temps_TAS.sh
 	@if [ "$(LAUNCH)" = NULL ]; then\
 		./$(SH_DIR)/temps_philo.sh;\
 		./$(SH_DIR)/temps_rw.sh;\
