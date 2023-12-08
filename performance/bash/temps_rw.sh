@@ -1,27 +1,25 @@
-#!/bin/bash
+#NAME_FILE="performance/csv/temps_read_write_POSIX.csv"
+#NAME_FILE="performance/csv/temps_read_write_TAS.csv"
+NAME_FILE="performance/csv/temps_read_write_TATAS.csv"
 
-if [ -z "$(find "performance")" ]; then # if we are already in the performance folder
-    echo "n,m_rw1,m_rw2,m_rw3,m_rw4,m_rw5" >"csv/temps_rw.csv"
-    cd ..
-else # if we call the script with make times
-    echo "n,m_rw1,m_rw2,m_rw3,m_rw4,m_rw5" >"performance/csv/temps_rw.csv"
-fi
-
-make -s
+echo "n,t_1,t_2,t_3,t_4,t_5" > $NAME_FILE
 
 for i in 2 4 8 16 32 64; do
-    echo -n "$i" >>"performance/csv/temps_rw.csv"
+    echo -n "$i" >> $NAME_FILE
 
     for j in 1 2 3 4 5; do
-        time_start=$(date +%s.%N)                             # time in nanoseconds (start)
-        ./main -f reader_writer -i $(($i / 2)) -j $(($i / 2)) # launch the program
-        time_end=$(date +%s.%N)                               # time in nanoseconds (end)
-        runtime=$(echo "$time_end - $time_start" | bc)       # execution time for reader_writer
-        echo -n ",$runtime" >>"performance/csv/temps_rw.csv" # Insert $runtime next to the existing code
+        runtime=$(/usr/bin/time -f "%E" ./main -f read_write -n $(($i / 2)) 2>&1 >/dev/null)
+        # Convert the time to seconds
+        minutes=$(echo $runtime | cut -d: -f1)
+        seconds=$(echo $runtime | cut -d: -f2 | cut -d. -f1)
+        milliseconds=$(echo $runtime | cut -d: -f2 | cut -d. -f2)
+        total_seconds=$(echo "scale=3; $minutes*60 + $seconds + $milliseconds/1000" | bc)
+        echo -n ",$total_seconds" >> $NAME_FILE
     done
 
-    echo "" >>"performance/csv/temps_rw.csv" # Insert a new line
+    echo "" >> $NAME_FILE
 done
 
-rm -f main
-cd performance
+if [ $1 = "cat" ]; then
+    cat $NAME_FILE
+fi

@@ -13,7 +13,7 @@ void *TAS_test(void *arg)
     int i = 0;
     while (i < CYCLES / nbr_threads)
     {
-        TATAS_lock(spin);
+        TAS_lock(spin);
 
         // critical section
         test++;
