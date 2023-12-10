@@ -1,6 +1,13 @@
 #include "../../headers/attente_active/my_semaphore.h"
 #include "../../headers/attente_active/my_mutex.h"
 
+/**
+ * @file my_semaphore.c
+ * @brief The file my_semaphore.c contains the implementation of the semaphores.
+ *
+ * We use the test_and_set() function for now.
+ */
+
 void my_semaphore_init(my_semaphore_t *sem, long value)
 {
     sem->value = value;
@@ -13,14 +20,14 @@ void my_semaphore_wait(my_semaphore_t *sem)
     {
     }
 
-    TATAS_lock(&sem->mutex);
+    TAS_lock(&sem->mutex);
     sem->value--;
     my_unlock(&sem->mutex);
 }
 
 void my_semaphore_post(my_semaphore_t *sem)
 {
-    TATAS_lock(&sem->mutex);
+    TAS_lock(&sem->mutex);
     sem->value++;
     my_unlock(&sem->mutex);
 }

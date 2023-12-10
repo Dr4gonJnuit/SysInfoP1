@@ -4,10 +4,11 @@
 #include "../includes.h"
 
 /**
- * @brief Function to execute the Dining Philosophers Problem by launching the differents threads and mutexes.
+ * @brief Function to execute the producer-consumer algorithm.
  * @note Destroy the mutexes at the end.
  *
- * @param nbr_philosophe Number of philosophers.
+ * @param nbr_produc Number of producer threads.
+ * @param nbr_conso Number of consumer threads
  */
 void run_produc_conso(int nbr_produc, int nbr_conso);
 

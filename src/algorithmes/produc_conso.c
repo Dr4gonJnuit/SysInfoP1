@@ -2,73 +2,93 @@
 #include "../../headers/attente_active/my_mutex.h"
 #include "../../headers/attente_active/my_semaphore.h"
 
+/**
+ * @file produc_conso.c
+ * @brief The file produc_conso.c is used to run the producer-consumer algorithm.
+ *
+ * For now we use the POSIX mutexes and semaphores.
+ *
+ * @see https://sites.uclouvain.be/SystInfo/notes/Theorie/Threads/coordination.html#probleme-des-producteurs-consommateurs
+ */
+
 #define TAILLE_BUFFER 8
 #define PRODUITS 8192
 #define MAX_INT 100
 #define MIN_INT 1
 
-int buffer[TAILLE_BUFFER];
+int buffer[TAILLE_BUFFER]; //< The "store" of the producer-consumer algorithm.
 int debut = 0, fin = 0;
 
 // Choose between my_mutex and pthread_mutex
-#ifdef MYMUTEX_H
+#ifndef MYMUTEX_H
 my_mutex_t mutex;
 #else
 pthread_mutex_t mutex;
 #endif
 
 // Choose between my_semaphore and pthread_semaphore
-#ifdef MYSEMAPHORE_H
+#ifndef MYSEMAPHORE_H
 my_semaphore_t plein, vide;
 #else
 sem_t plein, vide;
 #endif
 
+/**
+ * @brief Function to simulate the consumption of an element.
+ *
+ * @param element The element to consume.
+ */
 void conso(int element)
 {
 	return;
 }
 
+/**
+ * @brief The function that will be executed by the producer threads.
+ *
+ * @param arg Nothing to import.
+ * @return void*
+ */
 void *producteur(void *arg)
 {
 	int element;
 
 	for (int i = 0; i < PRODUITS; i++)
 	{
-		// random number
+		// Random number
 		element = rand() % (MAX_INT - MIN_INT + 1) + MIN_INT;
 
-		#ifdef MYSEMAPHORE_H
+#ifndef MYSEMAPHORE_H
 		my_semaphore_wait(&vide);
-		#else
+#else
 		sem_wait(&vide);
-		#endif
-		
-		#ifdef MYMUTEX_H
-		TATAS_lock(&mutex);
-		#else
-		pthread_mutex_lock(&mutex);
-		#endif
+#endif
 
-		// mettre elem dans buffer
+#ifndef MYMUTEX_H
+		TAS_lock(&mutex);
+#else
+		pthread_mutex_lock(&mutex);
+#endif
+
+		// Mettre elem dans buffer
 		buffer[fin] = element;
 
-		// on met a jour
+		// On met a jour
 		fin = (fin + 1) % TAILLE_BUFFER;
 
-		#ifdef MYMUTEX_H
+#ifndef MYMUTEX_H
 		my_unlock(&mutex);
-		#else
+#else
 		pthread_mutex_unlock(&mutex);
-		#endif
+#endif
 
-		#ifdef MYSEMAPHORE_H
+#ifndef MYSEMAPHORE_H
 		my_semaphore_post(&plein);
-		#else
+#else
 		sem_post(&plein);
-		#endif
+#endif
 
-		// simule temps de traitement
+		// Simule le temps de traitement
 		for (int j = 0; j < 10000; j++)
 		{
 		}
@@ -79,23 +99,29 @@ void *producteur(void *arg)
 	return (NULL);
 }
 
+/**
+ * @brief The function that will be executed by the consumer threads.
+ *
+ * @param arg Nothing to import.
+ * @return void*
+ */
 void *consommateur(void *arg)
 {
 	int element;
 
 	for (int i = 0; i < PRODUITS; i++)
 	{
-		#ifdef MYSEMAPHORE_H
+#ifndef MYSEMAPHORE_H
 		my_semaphore_wait(&plein);
-		#else
+#else
 		sem_wait(&plein);
-		#endif
+#endif
 
-		#ifdef MYMUTEX_H
-		TATAS_lock(&mutex);
-		#else
+#ifndef MYMUTEX_H
+		TAS_lock(&mutex);
+#else
 		pthread_mutex_lock(&mutex);
-		#endif
+#endif
 
 		// Retirer un elem du buffer
 		element = buffer[debut];
@@ -103,22 +129,22 @@ void *consommateur(void *arg)
 		// Utilise l'element
 		conso(element);
 
-		// on met a jour
+		// On met a jour
 		debut = (debut + 1) % TAILLE_BUFFER;
 
-		#ifdef MYMUTEX_H
+#ifndef MYMUTEX_H
 		my_unlock(&mutex);
-		#else
+#else
 		pthread_mutex_unlock(&mutex);
-		#endif
+#endif
 
-		#ifdef MYSEMAPHORE_H
+#ifndef MYSEMAPHORE_H
 		my_semaphore_post(&vide);
-		#else
+#else
 		sem_post(&vide);
-		#endif
+#endif
 
-		// simule temps de traintement
+		// Simule temps de traintement
 		for (int j = 0; j < 10000; j++)
 		{
 		}
@@ -133,20 +159,20 @@ void run_produc_conso(int nb_producteurs, int nb_consommateurs)
 {
 	pthread_t threads_prod[nb_producteurs], threads_cons[nb_consommateurs];
 
-	// inti semaphores
-	#ifdef MYMUTEX_H
+// inti semaphores
+#ifndef MYMUTEX_H
 	my_mutex_init(&mutex);
-	#else
+#else
 	pthread_mutex_init(&mutex, NULL);
-	#endif
+#endif
 
-	#ifdef MYSEMAPHORE_H
+#ifndef MYSEMAPHORE_H
 	my_semaphore_init(&plein, 0);
 	my_semaphore_init(&vide, TAILLE_BUFFER);
-	#else
+#else
 	sem_init(&plein, 0, 0);
 	sem_init(&vide, 0, TAILLE_BUFFER);
-	#endif
+#endif
 
 	// crée le thread producer
 	for (int i = 0; i < nb_producteurs; i++)
@@ -172,15 +198,15 @@ void run_produc_conso(int nb_producteurs, int nb_consommateurs)
 		pthread_join(threads_cons[i], NULL);
 	}
 
-	// DESTROY SEMAPHORES
-	#ifdef MYMUTEX_H
-	#else
+// DESTROY SEMAPHORES
+#ifndef MYMUTEX_H
+#else
 	pthread_mutex_destroy(&mutex);
-	#endif
+#endif
 
-	#ifdef MYSEMAPHORE_H
-	#else
+#ifndef MYSEMAPHORE_H
+#else
 	sem_destroy(&plein);
 	sem_destroy(&vide);
-	#endif
+#endif
 }

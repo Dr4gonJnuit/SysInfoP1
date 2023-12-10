@@ -23,9 +23,6 @@ main : main.c $(ALGO_DIR)/philosophes.c $(ALGO_DIR)/reader_writer.c $(ALGO_DIR)/
 TAS : performance/perf_TAS.c $(MUT_DIR)/my_mutex.c src/includes.c
 	$(CC) $(HEADER_DIRECTORY) $(FLAGS) -o perf_TAS $^ $(LIBS)
 
-#run : performance/perf_TAS.c $(MUT_DIR)/my_mutex.c src/includes.c
-#	$(CC) $(HEADER_DIRECTORY) $(FLAGS) -o perf_TAS $^ $(LIBS)
-
 tests : $(SH_DIR)/temps_philo.sh $(SH_DIR)/temps_rw.sh $(SH_DIR)/temps_pc.sh $(SH_DIR)/temps_TAS.sh
 	@if [ "$(LAUNCH)" = NULL ]; then\
 		./$(SH_DIR)/temps_philo.sh;\

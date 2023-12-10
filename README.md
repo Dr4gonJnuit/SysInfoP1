@@ -6,28 +6,67 @@ Projet 1 pour le cours de Systèmes Informatiques à UCL
 
 ```
 .
-├── experiments.sh
-├── headers
-│   ├── includes.h
-│   ├── philosophes.h
-│   └── reader_writer.h
-├── main.c
 ├── Makefile
-├── performance
-│   ├── csv
-│   │   ├── ingi_temps_philo.csv
-│   │   └── ingi_temps_rw.csv
-│   ├── main.py
-│   ├── temps_philo.sh
-│   └── temps_rw.sh
 ├── Projet1_multithread.pdf
 ├── README.md
+├── Rapport
+│   ├── LINFO1252_rapport_groupe1.aux
+│   ├── LINFO1252_rapport_groupe1.fdb_latexmk
+│   ├── LINFO1252_rapport_groupe1.fls
+│   ├── LINFO1252_rapport_groupe1.log
+│   ├── LINFO1252_rapport_groupe1.out
+│   ├── LINFO1252_rapport_groupe1.pdf
+│   ├── LINFO1252_rapport_groupe1.synctex.gz
+│   ├── LINFO1252_rapport_groupe1.tex
+│   └── images
+│       └── uclougo.jpg
+├── experiments.sh
+├── headers
+│   ├── algorithmes
+│   │   ├── philosophes.h
+│   │   ├── produc_conso.h
+│   │   └── reader_writer.h
+│   ├── attente_active
+│   │   ├── my_mutex.h
+│   │   └── my_semaphore.h
+│   └── includes.h
+├── main.c
+├── performance
+│   ├── bash
+│   │   ├── temps_TAS.sh
+│   │   ├── temps_pc.sh
+│   │   ├── temps_philo.sh
+│   │   └── temps_rw.sh
+│   ├── csv
+│   │   ├── Ingi_temps_philo_POSIX.csv
+│   │   ├── Ingi_temps_philo_TAS.csv
+│   │   ├── Ingi_temps_philo_TATAS.csv
+│   │   ├── Ingi_temps_prod_cons_POSIX.csv
+│   │   ├── Ingi_temps_prod_cons_TAS.csv
+│   │   ├── Ingi_temps_prod_cons_TATAS.csv
+│   │   ├── Ingi_temps_read_write_POSIX.csv
+│   │   ├── Ingi_temps_read_write_TAS.csv
+│   │   ├── Ingi_temps_read_write_TATAS.csv
+│   │   ├── Ingi_temps_test_TAS.csv
+│   │   └── Ingi_temps_test_TATAS.csv
+│   ├── main.py
+│   ├── perf_TAS.c
+│   └── result
+│       ├── Temps_TAS_TATAS.png
+│       ├── Temps_philo.png
+│       ├── Temps_prod_cons.png
+│       └── Temps_read_write.png
 └── src
-    ├── includes.c
-    ├── philosophes.c
-    └── reader_writer.c
+    ├── algorithmes
+    │   ├── philosophes.c
+    │   ├── produc_conso.c
+    │   └── reader_writer.c
+    ├── attente_active
+    │   ├── my_mutex.c
+    │   └── my_semaphore.c
+    └── includes.c
 
-4 directories, 16 files
+12 directories, 47 files
 ```
 
 ---
@@ -40,20 +79,33 @@ Dossier `src` : contient les fichiers sources du projet, nécessaire au lancemen
 
 Dossier `performance` : contient les scripts pour déterminer le temps d'exécution
 
+Dossier `Rapport` : contient le code source du rapport
+
 # Utilisation du Makefile
 
 ---
+
 ## Compilation
 
 Il y a deux manières de compiler le programme mais ils font la même chose.
 
-1) Compile le programme et crée l'exécutable main
+1. Compile le programme et crée l'exécutable main
 
 `make`
 
-2) Compile le programme et crée l'exécutable main
+2. Compile le programme et crée l'exécutable main
 
 `make run`
+
+Il y a aussi moyen de choisir le programme que vous souhaitez lancer avec ces commandes :
+
+1. Compile simplement les problèmes
+
+`make main`
+
+2. Compile simplement les performances du TAS et TATAS
+
+`make TAS`
 
 ## Execution
 
@@ -63,23 +115,21 @@ Le code s'exécute en lui indiquant le nom du programme que vous souhaitez lance
 
 OPTION :
 
-* `-f [NAME]` : NAME peut valoir *philo*, *reader_writer*
+- `-f [NAME]` : NAME peut valoir _philo_, _prod_cons_ ou _read_write_
 
-* `[OPTION]` : OPTION peut valoir *-n* ou *-i*, *-j* ou *-h*
+- `[OPTION]` : OPTION peut valoir _-n_ ou _-h_
 
-    * -n : s'utilise avec *philo*, c'est le nombre de philosophes que vous voulez appeler 
+  - -n : s'utilise pour indiquer le nombre de threads que vous souhaitez lancer (pour _prod_cons_ et _read_write_, ça lancera le même nombre de producteurs et consomateurs ou lecteurs et écrivains)
 
-    * -i et -j : s'utilise avec *reader_writer*, c'est le nombre de readers (*-i*) et le nombre de writers (*-j*) que vous voulez appeler
-
-    * -h : s'utilise pour afficher l'aide du programme choisi (*-?* fonctionne aussi)
+  - -h : s'utilise pour afficher l'aide du programme choisi (_-?_ fonctionne aussi)
 
 #### Exemple
 
-* `./main -h` : affiche l'aide du `main`
+- `./main -h` : affiche l'aide du `main`
 
-* `./main -f philo -h` : affiche l'aide du programme `philo`
+- `./main -f philo -h` : affiche l'aide du programme `philo`
 
-* `./main -f reader_writer -i 50 -j 6` : lance le programme reader_writer avec 50 readers et 6 writers
+- `./main -f read_write -n 7` : lance le programme reader_writer avec 7 readers et 7 writers
 
 ## Nettoyer le dossier
 
@@ -93,15 +143,17 @@ Supprime les fichiers `.csv` dans le dossier `performance/csv/` mais ignore ceux
 
 ## Calculer le temps
 
-`make times`
+`make tests`
 
 Lance tous les scripts présents dans `performance/` qui calcule le temps que mettent les différents programmes à finir.  
 Peut s'utiliser avec une option `LAUNCH` par défault à `NULL`  
-Précisez le nom du programme que vous souhaitez lancer (*philo* ou *rw*)  
-* `make times LAUNCH=philo`
-* `make times LAUNCH=rw`
+Précisez le nom du programme que vous souhaitez lancer (_philo_ ou _rw_ dans l'exemple ci-dessous)
+
+- `make tests LAUNCH=philo`
+- `make tests LAUNCH=rw`
 
 # Membres du groupe
+
 ---
 
 Bette Jonas

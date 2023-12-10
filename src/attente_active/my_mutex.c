@@ -1,23 +1,26 @@
 #include "../../headers/attente_active/my_mutex.h"
 
+/**
+ * @file my_mutex.c
+ * @brief The file my_mutex.c contains the implementation of the mutexes.
+ *
+ */
+
 long my_mutex_init(struct my_mutex_t *mutex)
 {
     asm("movl $0, %%eax\n"
         "xchgl %%eax, %0\n"
         : "+m"(mutex->flag)
         :
-        : "eax", "memory"
-    );
+        : "eax", "memory");
 
     return 0;
 }
 
-// Both of these lock shouldn't take a structure but the volatile long flag inside
-
 long TAS_lock(struct my_mutex_t *mutex)
 {
     long result;
-    
+
     asm volatile(
         "TAS_enter:\n"
         "   movl $1, %%eax\n"
@@ -26,8 +29,7 @@ long TAS_lock(struct my_mutex_t *mutex)
         "   jnz TAS_enter\n" // If another thread was faster to lock, we jump to TAS_enter
         : "+m"(mutex->flag), "=a"(result)
         :
-        : "memory"
-    );
+        : "memory");
 
     return result;
 }
@@ -35,7 +37,7 @@ long TAS_lock(struct my_mutex_t *mutex)
 long TATAS_lock(struct my_mutex_t *mutex)
 {
     long result;
-    
+
     asm volatile(
         "TATAS_enter:\n"
         "   movl $1, %%eax\n"
@@ -46,8 +48,7 @@ long TATAS_lock(struct my_mutex_t *mutex)
         "   jnz TATAS_enter\n" // If another thread was faster to lock, we jump to TATAS_enter
         : "+m"(mutex->flag), "=a"(result)
         :
-        : "memory"
-    );
+        : "memory");
 
     return result;
 }
@@ -58,8 +59,7 @@ long my_unlock(struct my_mutex_t *mutex)
         "xchgl %%eax, %0\n"
         : "+m"(mutex->flag)
         :
-        : "eax", "memory"
-    );
+        : "eax", "memory");
 
     return 0;
 }

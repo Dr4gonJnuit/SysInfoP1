@@ -3,6 +3,17 @@
 #include "headers/algorithmes/reader_writer.h"
 #include "headers/algorithmes/produc_conso.h"
 
+/**
+ * @file main.c
+ * @brief The file main.c is the main file of the project.
+ * It is used to run the different algorithms by calling the functions of the other files.
+ *
+ */
+
+/**
+ * @brief The structure args_p is used to store the arguments of the program.
+ *
+ */
 typedef struct args_p
 {
     char *name;          // name of the program to run
@@ -10,7 +21,12 @@ typedef struct args_p
     bool attente_active; // if true then use our personal mutexes and semaphores
 } args_p;
 
-void usage(char *prog_name) // Need to be updated
+/**
+ * @brief This function is used to show the help of the program.
+ *
+ * @param prog_name name of the program to run
+ */
+void usage(char *prog_name)
 {
     if (strcmp(prog_name, "main") == 0)
     {
@@ -73,15 +89,25 @@ void usage(char *prog_name) // Need to be updated
     }
 }
 
+/**
+ * @brief This function is used to parse the arguments of the program.
+ *
+ * @param args structure to store the arguments
+ * @param argc number of arguments
+ * @param argv arguments
+ * @return int 0 if no error, 1 if help, -1 if error
+ */
 int parse_args(args_p *args, int argc, char *argv[])
 {
-    memset(args, 0, sizeof(args_p));
+    memset(args, 0, sizeof(args_p)); // initialize the structure
 
+    // default values
     args->name = "main";
     args->nbr_threads[0] = 0;
     args->nbr_threads[1] = 0;
     args->attente_active = false;
 
+    // read the options
     int opt;
     while ((opt = getopt(argc, argv, ":f:a:n:h")) != -1)
     {
@@ -143,6 +169,14 @@ int parse_args(args_p *args, int argc, char *argv[])
     return 0;
 }
 
+/**
+ * @brief This is the main function of the program.
+ *
+ * @param argc number of arguments
+ * @param argv the options of the program
+ *
+ * @return int 0 if no error or if we called the help, -1 if error
+ */
 int main(int argc, char *argv[])
 {
     if (argc >= 2)
@@ -173,11 +207,13 @@ int main(int argc, char *argv[])
         else
         {
             printf("Invalid argument\n");
+            return EXIT_FAILURE;
         }
     }
     else
     {
         printf("No argument\n");
+        return EXIT_FAILURE;
     }
 
     return EXIT_SUCCESS;

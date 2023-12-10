@@ -1,15 +1,19 @@
 /**
  * @file philosophes.c
  * @brief Dining Philosophers Problem implementation.
+ *
+ * For now we use the POSIX mutexes.
+ *
+ * @see https://sites.uclouvain.be/SystInfo/notes/Theorie/Threads/threads2.html#le-probleme-des-philosophes
  */
 
 #include "../../headers/algorithmes/philosophes.h"
 #include "../../headers/attente_active/my_mutex.h"
 
 // #define CYCLES 10000000 // 10000000 = 10 000 000
-#define CYCLES 1000000
+#define CYCLES 1000000 // 1000000 = 1 000 000
 
-#ifdef MYMUTEX_H
+#ifndef MYMUTEX_H
 my_mutex_t *chopsticks; ///< Array of mutexes representing the chopsticks.
 #else
 pthread_mutex_t *chopsticks; ///< Array of mutexes representing the chopsticks.
@@ -24,6 +28,12 @@ void eat(int id)
     }
 }
 
+/**
+ * @brief The function that will be executed by the threads.
+ *
+ * @param arg The arguments of the function : the id of the philosopher and the number of philosophers.
+ * @return void*
+ */
 void *philosophe(void *arg)
 {
     // Parse args
@@ -38,34 +48,34 @@ void *philosophe(void *arg)
     {
         if (left < right) // Verifie if he can take a chopsticks.
         {
-            #ifdef MYMUTEX_H
-            TATAS_lock(&chopsticks[left]);
-            TATAS_lock(&chopsticks[right]);
-            #else
+#ifndef MYMUTEX_H
+            TAS_lock(&chopsticks[left]);
+            TAS_lock(&chopsticks[right]);
+#else
             pthread_mutex_lock(&chopsticks[left]);
             pthread_mutex_lock(&chopsticks[right]);
-            #endif
+#endif
         }
         else
         {
-            #ifdef MYMUTEX_H
-            TATAS_lock(&chopsticks[right]);
-            TATAS_lock(&chopsticks[left]);
-            #else
+#ifndef MYMUTEX_H
+            TAS_lock(&chopsticks[right]);
+            TAS_lock(&chopsticks[left]);
+#else
             pthread_mutex_lock(&chopsticks[right]);
             pthread_mutex_lock(&chopsticks[left]);
-            #endif
+#endif
         }
 
         // eat(id);
-        
-        #ifdef MYMUTEX_H
+
+#ifndef MYMUTEX_H
         my_unlock(&chopsticks[left]);
         my_unlock(&chopsticks[right]);
-        #else
+#else
         pthread_mutex_unlock(&chopsticks[left]);
         pthread_mutex_unlock(&chopsticks[right]);
-        #endif
+#endif
         i++;
     }
 
@@ -77,19 +87,19 @@ void run_philosophes(int nbr_philosophe)
     int err; //< Variable used to verify the eventual error.
     pthread_t phil[nbr_philosophe];
 
-    #ifdef MYMUTEX_H
+#ifndef MYMUTEX_H
     chopsticks = (my_mutex_t *)malloc(sizeof(my_mutex_t) * nbr_philosophe);
     if (chopsticks == NULL)
     {
         error(0, "malloc(chopsticks)");
     }
-    #else
+#else
     chopsticks = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t) * nbr_philosophe);
     if (chopsticks == NULL)
     {
         error(0, "malloc(chopsticks)");
     }
-    #endif
+#endif
 
     struct args_philosophes args_philosophes[nbr_philosophe];
 
@@ -102,16 +112,15 @@ void run_philosophes(int nbr_philosophe)
 
     for (i = 0; i < nbr_philosophe; i++)
     {
-        #ifdef MYMUTEX_H
+#ifndef MYMUTEX_H
         my_mutex_init(&chopsticks[i]);
-        #else
+#else
         err = pthread_mutex_init(&chopsticks[i], NULL);
         if (err != 0)
         {
             error(err, "Mutex(es) Initialisation (pthread_mutex_init())");
         }
-        #endif
-        
+#endif
     }
 
     for (i = 0; i < nbr_philosophe; i++)
@@ -132,8 +141,8 @@ void run_philosophes(int nbr_philosophe)
         }
     }
 
-    #ifdef MYMUTEX_H
-    #else
+#ifndef MYMUTEX_H
+#else
     for (i = 0; i < nbr_philosophe; i++)
     {
         err = pthread_mutex_destroy(&chopsticks[i]);
@@ -142,7 +151,7 @@ void run_philosophes(int nbr_philosophe)
             error(err, "Mutex(es) Destruction (pthread_mutex_destroy())");
         }
     }
-    #endif
+#endif
 
     free(chopsticks);
 }
